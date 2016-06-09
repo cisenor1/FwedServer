@@ -7,3 +7,12 @@
 - depending on how the install goes, sqlite3 might need to be installed separately (npm install sqlite3 --save)
 - to run the server, type 'nodemon app.js' from the Server directory.
 - if any packages fail to load, install them with the --save option, recommit the packages.json file.
+
+
+
+GIT:
+
+"git pull" to update
+"git push" to commit
+
+"node /home/rest/formulaWednesday/FwedServer/app/js" to launch server.
