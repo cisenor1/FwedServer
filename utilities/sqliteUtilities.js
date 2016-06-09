@@ -8,7 +8,6 @@ const db = new sqlite3.Database('Data/formulawednesday.sqlite');
 const driverSelect = "SELECT drivers.key, drivers.active, drivers.name, drivers.points, drivers.teamkey as teamKey, teams.name as teamName FROM drivers inner join teams on drivers.teamKey == teams.key";
 const raceSelect = "select r.*, s.cutoff, s.racedate as raceDate from races as r inner join seasons as s on r.key == s.racekey";
 const challengeSelect = "select c.*, ac.racekey as raceKey from challenges as c inner join activechallenges as ac on c.key == ac.challengekey";
-const userSelect = "select users.displayname as displayName, users.email, users.firstname as firstName, users.key, users.lastname as lastName, users.role, users.pass, users.points from users";
 const basicUserSelect = "select users.displayname as displayName, users.firstname as firstName, users.key, users.points from users";
 const userSelectNoPass = "select users.displayname as displayName, users.email, users.firstname as firstName, users.key, users.lastname as lastName, users.role, users.points from users";
 const userChoiceSelect = "select userchoices.challengeKey as key, userchoices.choice as value from userchoices";
@@ -63,19 +62,14 @@ function getRaces(season, key) {
     });
 };
 
-function getUsers(email, withPassword) {
+
+function getFullUsers(key) {
     return new Promise((resolve, reject) => {
-        let selectStatement;
-        if (withPassword) {
-            selectStatement = userSelect;
+        let statement = userSelectNoPass;
+        if (key) {
+            statement = statement + " where users.key = '" + key + "'";
         }
-        else {
-            selectStatement = userSelectNoPass;
-        }
-        if (email) {
-            selectStatement = selectStatement + " where users.email = '" + email + "'";
-        }
-        db.all(selectStatement, (err, rows) => {
+        db.all(statement, (err, rows) => {
             if (err) {
                 reject(err);
                 return;
@@ -85,10 +79,13 @@ function getUsers(email, withPassword) {
     });
 }
 
-function getBasicUsers() {
+function getBasicUsers(key) {
     return new Promise((resolve, reject) => {
-        let selectStatement = basicUserSelect;
-        db.all(selectStatement, (err, rows) => {
+        let statement = basicUserSelect;
+        if (key) {
+            statement = statement + " where users.key = '" + key + "'";
+        }
+        db.all(statement, (err, rows) => {
             if (err) {
                 reject(err);
                 return;
@@ -254,10 +251,10 @@ module.exports = {
     getDrivers: getDrivers,
     getRaces: getRaces,
     getChallenges: getChallenges,
-    getUsers: getUsers,
     getBasicUsers: getBasicUsers,
     saveUser: saveUser,
     getUserPicks: getUserPicks,
     saveUserPicks: saveUserPicks,
-    getBlogs: getBlogs
+    getBlogs: getBlogs,
+    getFullUsers: getFullUsers
 }

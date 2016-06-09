@@ -13,12 +13,12 @@ const checkAndDecodeToken = require('../utilities/token').checkAndDecodeToken;
 const db = require('../utilities/sqliteUtilities');
 
 function hashPassword(password, cb) {
-  // Generate a salt at level 10 strength
-  bcrypt.genSalt(10, (err, salt) => {
-    bcrypt.hash(password, salt, (err, hash) => {
-      return cb(err, hash);
+    // Generate a salt at level 10 strength
+    bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(password, salt, (err, hash) => {
+            return cb(err, hash);
+        });
     });
-  });
 }
 
 module.exports = [
@@ -29,7 +29,7 @@ module.exports = [
             // Before the route handler runs, verify that
             // the user is unique and assign the result to 'user'
             pre: [
-            { method: verifyUniqueUser, assign: 'user' }
+                { method: verifyUniqueUser, assign: 'user' }
             ],
             cors: true,
             handler: (req, res) => {
@@ -47,15 +47,15 @@ module.exports = [
                     user.password = hash;
                     db.saveUser(user).then(success => {
                         if (success) {
-                            res({ 
+                            res({
                                 id_token: createToken(user),
                                 key: user.key
-                             }).code(201);
+                            }).code(201);
                         }
                         else {
                             throw Boom.badRequest(new Error("unable to save user"));
                         }
-                        
+
                     }).catch(error => {
                         throw Boom.badRequest(error);
                     });
@@ -73,17 +73,17 @@ module.exports = [
         config: {
             // Check the user's password against the DB
             pre: [
-            { 
-                method: verifyCredentials, assign: 'user' 
-            }],
+                {
+                    method: verifyCredentials, assign: 'user'
+                }],
             cors: true,
             handler: (req, res) => {
                 // If the user's password is correct, we can issue a token.
                 // If it was incorrect, the error will bubble up from the pre method
-                res({ 
+                res({
                     id_token: createToken(req.pre.user),
                     key: req.pre.user.key
-                 }).code(200);
+                }).code(200);
             },
             validate: {
                 payload: authenticateUserSchema
@@ -92,60 +92,54 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/users/fullinfo',
-        config: {
-            cors: true,
-            handler: (req, res) => {
-                db.getUsers(null, false).then(users => {
-                    res(users);
-                });
-            },
-            // Add authentication to this route
-            // The user must have a scope of `admin`
-            auth: {
-                strategy: 'jwt',
-                scope: ['admin']
-            }
-        }
-    },
-    {
-        method: 'GET',
-        path: '/users/basicinfo',
-        config: {
-            cors: true,
-            handler: (req, res) => {
-                db.getBasicUsers(null, false).then(users => {
-                    res(users);
-                });
-            },
-            auth: {
-                strategy: 'jwt',
-                scope: ['user']
-            }
-        }
-    },
-    {
-        method: 'GET',
-        path: '/users/{key}',
+        path: '/users/{key?}',
         config: {
             cors: true,
             handler: (req, res) => {
                 let credentials = req.auth.credentials;
-                if (req.params.key !== credentials.key)
-                {
-                    throw Boom.badRequest(new Error("cannot request info for different user"));
+                let isAdmin = credentials.scope.indexOf('admin') >= 0;
+                // If the person is requesting their own info, then they can have it.
+                if (req.params.key === credentials.key) {
+                    db.getFullUsers(credentials.key).then(users => {
+                        if (!users) {
+                            throw Boom.badRequest(new Error("user information could not be found"));
+                        }
+                        var user = users[0];
+                        if (!user) {
+                            throw Boom.badRequest(new Error("user information could not be found"));
+                        }
+                        res(user);
+                    });
                 }
-                db.getUsers(credentials.email, false).then(users => {
-                    if (!users) {
-                        throw Boom.badRequest(new Error("user information could not be found"));
-                    }
-                    var user = users[0];
-                    if (!user)
-                    {
-                        throw Boom.badRequest(new Error("user information could not be found"));
-                    }
-                    res(user);
-                });
+                // If the person requesting information is a 
+                else if (isAdmin) {
+                    console.log(req.params.key);
+                    db.getFullUsers(req.params.key).then(users => {
+                        if (req.params.key) {
+                            let user = users[0];
+                            if (!user) {
+                                throw Boom.badRequest(new Error("user key provided was not found"));
+                            }
+                            res(user);
+                            return;
+                        }
+                        res(users);
+                    });
+                }
+                // They have authenticated, so we'll get them the basic info
+                else {
+                    db.getBasicUsers(req.params.key).then(users => {
+                        if (req.params.key) {
+                            let user = users[0];
+                            if (!user) {
+                                throw Boom.badRequest(new Error("user key provided was not found"));
+                            }
+                            res(user);
+                            return;
+                        }
+                        res(users);
+                    });
+                }
             },
             auth: {
                 strategy: 'jwt',
