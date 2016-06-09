@@ -13,6 +13,12 @@
 GIT:
 
 "git pull" to update
-"git push" to commit
+
+
+COMMIT CHANGES:
+"git add $changedFile"
+"git commit"
+"git push"
+
 
 "node /home/rest/formulaWednesday/FwedServer/app/js" to launch server.
