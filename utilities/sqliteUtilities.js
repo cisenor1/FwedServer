@@ -3,7 +3,7 @@
 const Promise = require('bluebird');
 const sqlite3 = require('sqlite3').verbose();
 const formatString = require('format-string');
-const db = new sqlite3.Database('../Data/formulawednesday.sqlite');
+const db = new sqlite3.Database('Data/formulawednesday.sqlite');
 
 const driverSelect = "SELECT drivers.key, drivers.active, drivers.name, drivers.points, drivers.teamkey as teamKey, teams.name as teamName FROM drivers inner join teams on drivers.teamKey == teams.key";
 const raceSelect = "select r.*, s.cutoff, s.racedate as raceDate from races as r inner join seasons as s on r.key == s.racekey";
