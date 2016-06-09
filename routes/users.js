@@ -31,6 +31,7 @@ module.exports = [
             pre: [
             { method: verifyUniqueUser, assign: 'user' }
             ],
+            cors: true,
             handler: (req, res) => {
                 let user = new User();
                 user.email = req.payload.email;
@@ -75,6 +76,7 @@ module.exports = [
             { 
                 method: verifyCredentials, assign: 'user' 
             }],
+            cors: true,
             handler: (req, res) => {
                 // If the user's password is correct, we can issue a token.
                 // If it was incorrect, the error will bubble up from the pre method
@@ -92,6 +94,7 @@ module.exports = [
         method: 'GET',
         path: '/users/fullinfo',
         config: {
+            cors: true,
             handler: (req, res) => {
                 db.getUsers(null, false).then(users => {
                     res(users);
@@ -109,6 +112,7 @@ module.exports = [
         method: 'GET',
         path: '/users/basicinfo',
         config: {
+            cors: true,
             handler: (req, res) => {
                 db.getBasicUsers(null, false).then(users => {
                     res(users);
@@ -124,6 +128,7 @@ module.exports = [
         method: 'GET',
         path: '/users/{key}',
         config: {
+            cors: true,
             handler: (req, res) => {
                 let credentials = req.auth.credentials;
                 if (req.params.key !== credentials.key)

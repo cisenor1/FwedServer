@@ -7,6 +7,7 @@ module.exports = [
         method: 'GET',
         path: '/challenges/{season}/{raceKey}/{key?}',
         config: {
+            cors: true,
             handler: function (request, reply) {
                 db.getChallenges(request.params.season, request.params.raceKey, request.params.key).then(challenges => {
                     reply(challenges);
@@ -22,6 +23,7 @@ module.exports = [
         method: 'GET',
         path: '/challenges/{season}/{raceKey}/{userKey}/picks/{key?}',
         config: {
+            cors: true,
             handler: function (request, reply) {
                 let credentials = request.auth.credentials;
                 if (request.params.userKey !== credentials.key) {
@@ -41,6 +43,7 @@ module.exports = [
         method: 'POST',
         path: '/challenges/{season}/{raceKey}/{userKey}/picks',
         config: {
+            cors: true,
             handler: (request, reply) => {
                 let credentials = request.auth.credentials;
                 if (request.params.userKey !== credentials.key) {

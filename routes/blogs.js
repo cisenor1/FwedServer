@@ -7,6 +7,7 @@ module.exports = [
         method: 'GET',
         path: '/blogs',
         config: {
+            cors: true,
             handler: function (request, reply) {
                 db.getBasicUsers().then(basicUsers => {
                     db.getBlogs().then(blogs => {
