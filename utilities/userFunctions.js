@@ -28,7 +28,7 @@ function verifyCredentials(req, res) {
     const password = req.payload.password;
 
     // Find an entry from the database that
-    // matches either the email or username
+    // matches the email
     db.getUsers(req.payload.email, true).then(users => {
         if (users && users.length > 0) {
             var user = users[0];
@@ -46,11 +46,11 @@ function verifyCredentials(req, res) {
                 });
             }
             else {
-                res(Boom.badRequest('Incorrect username or email!'));
+                res(Boom.badRequest('Incorrect email!'));
             }
         }
         else {
-            res(Boom.badRequest('Incorrect username or email!'));
+            res(Boom.badRequest('Incorrect email!'));
         }
     });
 }

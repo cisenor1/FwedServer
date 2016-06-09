@@ -12,7 +12,7 @@ const basicUserSelect = "select users.displayname as displayName, users.firstnam
 const userSelectNoPass = "select users.displayname as displayName, users.email, users.firstname as firstName, users.key, users.lastname as lastName, users.role, users.points from users";
 const userChoiceSelect = "select userchoices.challengeKey as key, userchoices.choice as value from userchoices";
 const userInsert = "INSERT INTO users (key, email, pass, displayname, firstname, lastname, role)";
-
+const userSelect = "select users.displayname as displayName, users.email, users.firstname as firstName, users.key, users.lastname as lastName, users.role, users.pass, users.points from users";
 const blogQuery = "select blogs.message, blogs.title, blogs.userkey as userKey, blogs.postdate as postDate from blogs";
 
 const userChoicesInsert = "INSERT OR REPLACE INTO userchoices (userkey, season, racekey, challengekey, choice)";
@@ -62,6 +62,21 @@ function getRaces(season, key) {
     });
 };
 
+function getUsers(email, withPassword) {
+	return new Promise((resolve, reject) => {
+		let statement = userSelect;
+		if (email) {
+			statement = statement + " where users.email = '" + email + "'";
+		}
+		db.all(statement, (err, rows) => {
+			if (err) {
+				reject(err);
+				return;
+			}
+			resolve(rows);
+		});
+	});	
+}
 
 function getFullUsers(key) {
     return new Promise((resolve, reject) => {
@@ -256,5 +271,6 @@ module.exports = {
     getUserPicks: getUserPicks,
     saveUserPicks: saveUserPicks,
     getBlogs: getBlogs,
-    getFullUsers: getFullUsers
+    getFullUsers: getFullUsers,
+	getUsers: getUsers
 }
