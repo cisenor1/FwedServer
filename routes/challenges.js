@@ -47,26 +47,37 @@ module.exports = [
             handler: (request, reply) => {
                 let credentials = request.auth.credentials;
                 if (request.params.userKey !== credentials.key) {
-                    throw Boom.badRequest(new Error("cannot request picks for different user"));
+                    throw Boom.badRequest(new Error("cannot save picks for different user"));
                 }
                 let picks = [];
                 let season = parseInt(request.params.season);
                 let raceKey = request.params.raceKey;
                 let userKey = request.params.userKey;
-                request.payload.forEach(cdm => {
-                    var pick = {
-                        season: season,
-                        raceKey: raceKey,
-                        userKey: userKey,
-                        challengeKey: cdm.key,
-                        choice: cdm.value
-                    };
-                    picks.push(pick);
-                });
-                
-                db.saveUserPicks(picks).then(success => {
-                    reply(success).code(201);
-                });
+                if (request.payload) {
+                    let restUserPicks = JSON.parse(request.payload);
+                    console.log(restUserPicks);
+                    if (restUserPicks.length) {
+                        restUserPicks.forEach(cdm => {
+                            var pick = {
+                                season: season,
+                                raceKey: raceKey,
+                                userKey: userKey,
+                                challengeKey: cdm.key,
+                                choice: cdm.value
+                            };
+                            picks.push(pick);
+                        });
+                        db.saveUserPicks(picks).then(success => {
+                            reply(success).code(200);
+                        });
+                    }
+                    else {
+                        throw Boom.badRequest(new Error("no valid picks given to save"));
+                    }
+                }
+                else {
+                    throw Boom.badRequest(new Error("no valid picks given to save"));
+                }
             },
             auth: {
                 strategy: 'jwt',
