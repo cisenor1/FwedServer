@@ -30,17 +30,31 @@ function getBlogs() {
     });
 }
 
-function getDrivers(key) {
+function getDrivers(active, key) {
     return new Promise((resolve, reject) => {
         let whereStatement = "";
+        if (active) {
+            whereStatement = "where active = 1";
+        }
+        else {
+            whereStatement = "where active >= 0";
+        }
         if (key) {
-            whereStatement = "where key = '" + key + "'";
+            whereStatement = "and key = '" + key + "'";
         }
         db.all(driverSelect + " " + whereStatement, (err, rows) => {
             if (err) {
                 reject(err);
                 return;
             }
+            rows.forEach(row => {
+                if (row.active) {
+                    row.active = true;
+                }
+                else {
+                    row.active = false;
+                }
+            });
             resolve(rows);
         });
     });
@@ -144,7 +158,7 @@ function getChallenges(season, raceKey, challengeKey) {
             reject(new Error("Need a season and a race key"));
             return;
         }
-        let driverPromise = getDrivers();
+        let driverPromise = getDrivers(true);
         let challengePromise = _getChallengesInternal(season, raceKey);
         let challengeChoiceMapsPromise = _getChallengeChoicesInternal(season, raceKey);
         Promise.all([driverPromise, challengePromise, challengeChoiceMapsPromise]).then((results) => {
