@@ -24,15 +24,14 @@ function verifyUniqueUser(req, res) {
 }
 
 function verifyCredentials(req, res) {
-
     const password = req.payload.password;
-
     // Find an entry from the database that
     // matches the email
     db.getUsers(req.payload.email, true).then(users => {
         if (users && users.length > 0) {
             var user = users[0];
             if (user) {
+                console.log(password);
                 bcrypt.compare(password, user.pass, (err, isValid) => {
                     if (isValid) {
                         user.password = null;

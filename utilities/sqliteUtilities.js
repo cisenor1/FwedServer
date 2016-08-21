@@ -182,15 +182,19 @@ function updateUser(user) {
             updateObject[5] = user.points;
         }
         if (user.password) {
-            updateFields.push("password = ?6");
+            updateFields.push("pass = ?6");
             updateObject[6] = user.password;
         }
+
+        if (!updateFields.length) {
+            reject("nothing to update");
+        }
+
         let fieldStatement = updateFields.join(",");
         updateStatement += fieldStatement;
         let where = " WHERE key = ?7";
         updateObject[7] = user.key;
         updateStatement += where;
-        console.log(updateStatement);
         db.run(updateStatement, updateObject, (err) => {
             if (err) {
                 reject(err);

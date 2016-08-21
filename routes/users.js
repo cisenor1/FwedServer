@@ -24,6 +24,53 @@ function hashPassword(password, cb) {
 module.exports = [
     {
         method: 'PUT',
+        path: '/users/{key}/updatePassword',
+        config: {
+            cors: true,
+            handler: (req, res) => {
+                let credentials = req.auth.credentials;
+                let isAdmin = credentials.scope.indexOf('admin') >= 0;
+
+                // If someone tries to save info for a different user, don't allow it, unless the person saving is an admin
+                if (req.params.key !== credentials.key && !isAdmin) {
+                    res(Boom.badRequest("cannot change password for a different user"));
+                    return;
+                }
+                let newPassword = req.payload.newPassword;
+                hashPassword(newPassword, (err, hashedPassword) => {
+                    if (err) {
+                        res(Boom.badRequest(err));
+                        return;
+                    }
+                    // Get the existing user out of the database.
+                    db.getFullUsers(req.params.key).then(users => {
+                        let existingUser = users[0];
+                        if (!existingUser) {
+                            res(Boom.badRequest(new Error("user key provided was not found")));
+                            return;
+                        }
+                        // Create a new user object that will hold the password and the user's key
+                        let newUser = new User();
+                        newUser.password = hashedPassword;
+                        newUser.key = req.params.key;
+                        db.updateUser(newUser).then(updatedUser => {
+                            res(updatedUser);
+                            return;
+                        }).catch(error => {
+                            console.log(error);
+                            res(Boom.badRequest(error));
+                        });
+                    });
+                });
+            },
+            auth: {
+                strategy: 'jwt',
+                scope: ['user']
+            }
+        }
+    },
+    {
+        method: 'PUT',
         path: '/users/{key}',
         config: {
             cors: true,
@@ -33,7 +80,8 @@ module.exports = [
 
                 // If someone tries to save info for a different user, don't allow it, unless the person saving is an admin
                 if (req.params.key !== credentials.key && !isAdmin) {
-                    throw Boom.badRequest("cannot save values for a different user")
+                    res(Boom.badRequest("cannot save values for a different user"));
+                    return;
                 }
                 
                 let newUser = new User();
@@ -41,9 +89,6 @@ module.exports = [
                 newUser.firstName = req.payload.firstName;
                 newUser.lastName = req.payload.lastName;
                 newUser.key = req.params.key;
-                if (req.payload.newPassword) {
-                    newUser.password = hashPassword(req.payload)
-                }
                 
                 if (isAdmin){
                     newUser.role = req.payload.role;
@@ -54,12 +99,16 @@ module.exports = [
                 db.getFullUsers(req.params.key).then(users => {
                     let existingUser = users[0];
                     if (!existingUser) {
-                        throw Boom.badRequest(new Error("user key provided was not found"));
+                        res(Boom.badRequest(new Error("user key provided was not found")));
+                        return;
                     }
 
                     db.updateUser(newUser).then(updatedUser => {
                         res(updatedUser);
                         return;
+                    }).catch(error => {
+                        console.log(error);
+                        res(Boom.badRequest(error));
                     });
                 });
             },
@@ -160,7 +209,6 @@ module.exports = [
                 }
                 // If the person requesting information is a 
                 else if (isAdmin) {
-                    console.log(req.params.key);
                     db.getFullUsers(req.params.key).then(users => {
                         if (req.params.key) {
                             let user = users[0];
