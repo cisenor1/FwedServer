@@ -152,6 +152,62 @@ function saveUser(user) {
     });
 }
 
+function updateUser(user) {
+    return new Promise((resolve, reject) => {
+        if (!user) {
+            reject(new Error("must have a user to update"));
+            return;
+        }
+        let updateStatement = "UPDATE users SET ";
+        let updateFields = [];
+        let updateObject = {};
+        if (user.displayName) {
+            updateFields.push("displayname = ?1");
+            updateObject[1] = user.displayName;
+        }
+        if (user.firstName) {
+            updateFields.push("firstname = ?2");
+            updateObject[2] = user.firstName;
+        }
+        if (user.lastName) {
+            updateFields.push("lastname = ?3");
+            updateObject[3] = user.lastName;
+        }
+        if (user.role) {
+            updateFields.push("role = ?4");
+            updateObject[4] = user.role;
+        }
+        if (user.points) {
+            updateFields.push("points = ?5");
+            updateObject[5] = user.points;
+        }
+        if (user.password) {
+            updateFields.push("password = ?6");
+            updateObject[6] = user.password;
+        }
+        let fieldStatement = updateFields.join(",");
+        updateStatement += fieldStatement;
+        let where = " WHERE key = ?7";
+        updateObject[7] = user.key;
+        updateStatement += where;
+        console.log(updateStatement);
+        db.run(updateStatement, updateObject, (err) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            getFullUsers(user.key).then(users => {
+                let newUser = users[0];
+                if (!newUser) {
+                    reject("could not find user in database");
+                    return;
+                }
+                resolve(newUser);
+            });
+        });
+    });
+}
+
 function getChallenges(season, raceKey, challengeKey) {
     return new Promise((resolve, reject) => {
         if (!season) {
@@ -286,5 +342,6 @@ module.exports = {
     saveUserPicks: saveUserPicks,
     getBlogs: getBlogs,
     getFullUsers: getFullUsers,
-	getUsers: getUsers
+	getUsers: getUsers,
+    updateUser: updateUser
 }

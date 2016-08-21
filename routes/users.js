@@ -23,6 +23,53 @@ function hashPassword(password, cb) {
 
 module.exports = [
     {
+        method: 'PUT',
+        path: '/users/{key}',
+        config: {
+            cors: true,
+            handler: (req, res) => {
+                let credentials = req.auth.credentials;
+                let isAdmin = credentials.scope.indexOf('admin') >= 0;
+
+                // If someone tries to save info for a different user, don't allow it, unless the person saving is an admin
+                if (req.params.key !== credentials.key && !isAdmin) {
+                    throw Boom.badRequest("cannot save values for a different user")
+                }
+                
+                let newUser = new User();
+                newUser.displayName = req.payload.displayName;
+                newUser.firstName = req.payload.firstName;
+                newUser.lastName = req.payload.lastName;
+                newUser.key = req.params.key;
+                if (req.payload.newPassword) {
+                    newUser.password = hashPassword(req.payload)
+                }
+                
+                if (isAdmin){
+                    newUser.role = req.payload.role;
+                    newUser.points = req.payload.points;
+                }
+                
+                // Get the existing user out of the database.
+                db.getFullUsers(req.params.key).then(users => {
+                    let existingUser = users[0];
+                    if (!existingUser) {
+                        throw Boom.badRequest(new Error("user key provided was not found"));
+                    }
+
+                    db.updateUser(newUser).then(updatedUser => {
+                        res(updatedUser);
+                        return;
+                    });
+                });
+            },
+            auth: {
+                strategy: 'jwt',
+                scope: ['user']
+            }
+        }
+    },
+    {
         method: 'POST',
         path: '/users',
         config: {
