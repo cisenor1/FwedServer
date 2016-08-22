@@ -11,7 +11,7 @@ const challengeSelect = "select c.*, ac.racekey as raceKey from challenges as c 
 const basicUserSelect = "select users.displayname as displayName, users.firstname as firstName, users.key, users.points from users";
 const userSelectNoPass = "select users.displayname as displayName, users.email, users.firstname as firstName, users.key, users.lastname as lastName, users.role, users.points from users";
 const userChoiceSelect = "select userchoices.challengeKey as key, userchoices.choice as value from userchoices";
-const userInsert = "INSERT INTO users (key, email, pass, displayname, firstname, lastname, role)";
+const userInsert = "INSERT INTO users (key, email, pass, displayname, firstname, lastname, role, points)";
 const userSelect = "select users.displayname as displayName, users.email, users.firstname as firstName, users.key, users.lastname as lastName, users.role, users.pass, users.points from users";
 const blogQuery = "select blogs.message, blogs.title, blogs.userkey as userKey, blogs.postdate as postDate from blogs";
 
@@ -124,6 +124,19 @@ function getBasicUsers(key) {
     });
 }
 
+function deleteUser(key) {
+    return new Promise((resolve, reject) => {
+        let deleteStatement = "DELETE FROM users where key = '" + key + "'";
+        db.run(deleteStatement, (err) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(true);
+        });
+    });
+}
+
 function saveUser(user) {
     return new Promise((resolve, reject) => {
         if (!user) {
@@ -131,7 +144,7 @@ function saveUser(user) {
             return;
         }
 
-        let valuesStatement = "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);";
+        let valuesStatement = "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);";
         let valuesObject = {
             1: user.key,
             2: user.email,
@@ -139,7 +152,8 @@ function saveUser(user) {
             4: user.displayName ? user.displayName : "",
             5: user.firstName ? user.firstName : "",
             6: user.lastName ? user.lastName : "",
-            7: user.role
+            7: user.role,
+            8: user.points ? user.points : 0
         };
         var insertStatement = userInsert + " " + valuesStatement;
         db.run(insertStatement, valuesObject, (err) => {

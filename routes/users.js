@@ -149,11 +149,11 @@ module.exports = [
                             }).code(201);
                         }
                         else {
-                            throw Boom.badRequest(new Error("unable to save user"));
+                            res(Boom.badRequest(new Error("unable to save user")));
                         }
 
                     }).catch(error => {
-                        throw Boom.badRequest(error);
+                        res(Boom.badRequest(error));
                     });
                 });
             },
@@ -183,6 +183,24 @@ module.exports = [
             },
             validate: {
                 payload: authenticateUserSchema
+            }
+        }
+    },
+    {
+        method: 'DELETE',
+        path: '/users/{key}',
+        config: {
+            cors: true,
+            handler: (req, res) => {
+                if (req.params.key === credentials.key) {
+                    res(Boom.badRequest("cannot delete own user"));
+                    return;
+                }
+                
+            },
+            auth: {
+                strategy: 'jwt',
+                scope: ['admin']
             }
         }
     },
