@@ -5,6 +5,24 @@ const db = require('../utilities/sqliteUtilities');
 module.exports = [
     {
         method: 'GET',
+        path: '/challenges',
+        config: {
+            cors: true,
+            handler: (request, reply) => {
+                db.getAllChallenges().then(challenges => {
+                    reply(challenges);
+                }).catch(error => {
+                    reply(Boom.badRequest(error));
+                });
+            },
+            auth: {
+                strategy: 'jwt',
+                scope: ['admin']
+            }
+        }
+    },
+    {
+        method: 'GET',
         path: '/challenges/{season}/{raceKey}/{key?}',
         config: {
             cors: true,

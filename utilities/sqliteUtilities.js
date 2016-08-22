@@ -5,8 +5,10 @@ const sqlite3 = require('sqlite3').verbose();
 const formatString = require('format-string');
 const db = new sqlite3.Database('Data/formulawednesday.sqlite');
 
+const allChallengesSelect = "SELECT * from challenges";
+
 const driverSelect = "SELECT drivers.key, drivers.active, drivers.name, drivers.points, drivers.teamkey as teamKey, teams.name as teamName FROM drivers inner join teams on drivers.teamKey == teams.key";
-const raceSelect = "select r.*, s.cutoff, s.racedate as raceDate from races as r inner join seasons as s on r.key == s.racekey";
+const raceSelect = "select r.*, s.cutoff, s.racedate as raceDate, s.scored from races as r inner join seasons as s on r.key == s.racekey";
 const challengeSelect = "select c.*, ac.racekey as raceKey from challenges as c inner join activechallenges as ac on c.key == ac.challengekey";
 const basicUserSelect = "select users.displayname as displayName, users.firstname as firstName, users.key, users.points from users";
 const userSelectNoPass = "select users.displayname as displayName, users.email, users.firstname as firstName, users.key, users.lastname as lastName, users.role, users.points from users";
@@ -71,6 +73,9 @@ function getRaces(season, key) {
                 reject(err);
                 return;
             }
+            rows.forEach(row => {
+                row.scored = !!row.scored;
+            });
             resolve(rows);
         });
     });
@@ -280,6 +285,18 @@ function getUserPicks(userKey, season, raceKey, challengeKey) {
     });
 }
 
+function getAllChallenges() {
+    return new Promise((resolve, reject) => {
+        db.all(allChallengesSelect, function(err, rows) {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(rows);
+        });
+    });
+}
+
 function saveUserPicks(userPicks) {
     return new Promise((resolve, reject) => {
         try {
@@ -354,6 +371,7 @@ module.exports = {
     getDrivers: getDrivers,
     getRaces: getRaces,
     getChallenges: getChallenges,
+    getAllChallenges: getAllChallenges,
     getBasicUsers: getBasicUsers,
     saveUser: saveUser,
     getUserPicks: getUserPicks,
