@@ -37,8 +37,6 @@ function addNewRadioMessage(newMessage) {
     return new Promise((resolve, reject) => {
         try {
             let insertStatement = addRadioMessage + " VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
-            console.log(decodeURIComponent(newMessage));
-            console.log(newMessage.image_url);
             db.serialize(() => {
                 db.exec("BEGIN;");
                     let valuesObject = {

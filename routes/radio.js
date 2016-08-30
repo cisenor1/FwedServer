@@ -24,7 +24,6 @@ module.exports = [
             cors: true,
             handler: function (request, reply) {
                 if (request.payload){
-                    let p = request.payload;
                     let o ={
                         image_url: request.payload.image_url
                     }
