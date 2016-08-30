@@ -24,10 +24,10 @@ module.exports = [
             cors: true,
             handler: function (request, reply) {
                 if (request.payload){
-                    let p = decodeURIComponent(request.payload);
-                    console.log(p);
-                    let o = JSON.parse(p);
-                    console.log(o);
+                    let p = request.payload;
+                    let o ={
+                        image_url: p.image_url
+                    }
                     db.addNewRadioMessage(o).then((bool)=>{
                         if (bool){
                             reply("{success:true}");
