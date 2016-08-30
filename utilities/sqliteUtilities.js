@@ -20,6 +20,18 @@ const topMessage = "select * from messageoftherace order by created_date DESC LI
 
 const userChoicesInsert = "INSERT OR REPLACE INTO userchoices (userkey, season, racekey, challengekey, choice)";
 
+function getLatestRadioMessage() {
+    return new Promise((resolve,reject)=>{    
+        let statement = topMessage;
+        db.all(statement, (err,rows)=>{
+            if (err){
+                reject(err);
+            }
+            resolve(rows[0]);
+        });
+    });
+}
+
 function getBlogs() {
     return new Promise((resolve, reject) => {
         let statement = blogQuery;
