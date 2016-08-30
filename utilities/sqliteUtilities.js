@@ -392,5 +392,6 @@ module.exports = {
     getBlogs: getBlogs,
     getFullUsers: getFullUsers,
 	getUsers: getUsers,
-    updateUser: updateUser
+    updateUser: updateUser,
+    getLatestRadioMessage: getLatestRadioMessage
 }
