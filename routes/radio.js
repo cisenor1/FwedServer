@@ -28,6 +28,7 @@ module.exports = [
                     let o ={
                         image_url: p.image_url
                     }
+                    console.log(o);
                     db.addNewRadioMessage(o).then((bool)=>{
                         if (bool){
                             reply("{success:true}");
