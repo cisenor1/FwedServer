@@ -24,7 +24,7 @@ module.exports = [
             cors: true,
             handler: function (request, reply) {
                 if (request.payload){
-                    let p = decodeURIComponent(request.payload.payload);
+                    let p = decodeURIComponent(request.payload);
                     console.log(p);
                     let o = JSON.parse(p);
                     console.log(o);
