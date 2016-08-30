@@ -25,7 +25,7 @@ module.exports = [
             handler: function (request, reply) {
                 if (request.payload){
                     console.log(request.payload);
-                    db.addNewRadioMessage(request.payload).then((bool)=>{
+                    db.addNewRadioMessage(request.payload.payload).then((bool)=>{
                         if (bool){
                             reply("{success:true}");
                         }
