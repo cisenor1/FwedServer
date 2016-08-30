@@ -16,6 +16,7 @@ const userChoiceSelect = "select userchoices.challengeKey as key, userchoices.ch
 const userInsert = "INSERT INTO users (key, email, pass, displayname, firstname, lastname, role, points)";
 const userSelect = "select users.displayname as displayName, users.email, users.firstname as firstName, users.key, users.lastname as lastName, users.role, users.pass, users.points from users";
 const blogQuery = "select blogs.message, blogs.title, blogs.userkey as userKey, blogs.postdate as postDate from blogs";
+const topMessage = "select * from messageoftherace order by created_date DESC LIMIT 1 ";
 
 const userChoicesInsert = "INSERT OR REPLACE INTO userchoices (userkey, season, racekey, challengekey, choice)";
 
