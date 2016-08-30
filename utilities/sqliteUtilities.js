@@ -19,7 +19,7 @@ const blogQuery = "select blogs.message, blogs.title, blogs.userkey as userKey, 
 const topMessage = "select * from messageoftherace order by created_date DESC LIMIT 1 ";
 
 const userChoicesInsert = "INSERT OR REPLACE INTO userchoices (userkey, season, racekey, challengekey, choice)";
-const addRadioMessage = "INSERT OR REPLACE INTO radiomessages (image_url, message, created_by, created_date, season_id, race_id)";
+const addRadioMessage = "INSERT OR REPLACE INTO messageoftherace (image_url, message, created_by, created_date, season_id, race_id)";
 
 function getLatestRadioMessage() {
     return new Promise((resolve,reject)=>{    
