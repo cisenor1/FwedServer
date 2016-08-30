@@ -24,6 +24,7 @@ module.exports = [
             cors: true,
             handler: function (request, reply) {
                 if (request.payload){
+                    console.log(request.payload);
                     db.addNewRadioMessage(request.payload).then((bool)=>{
                         if (bool){
                             reply("{success:true}");
