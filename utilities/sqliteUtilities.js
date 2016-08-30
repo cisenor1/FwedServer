@@ -38,7 +38,7 @@ function addNewRadioMessage(newMessage) {
         try {
             let insertStatement = addRadioMessage + " VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
             console.log(insertStatement);
-            console.log(JSON.parse(newMessage));
+            console.log(JSON.parse(decodeURIComponent(newMessage)));
             db.serialize(() => {
                 db.exec("BEGIN;");
                     let valuesObject = {
