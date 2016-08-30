@@ -19,6 +19,7 @@ const blogQuery = "select blogs.message, blogs.title, blogs.userkey as userKey, 
 const topMessage = "select * from messageoftherace order by created_date DESC LIMIT 1 ";
 
 const userChoicesInsert = "INSERT OR REPLACE INTO userchoices (userkey, season, racekey, challengekey, choice)";
+const addRadioMessage = "INSERT OR REPLACE INTO radiomessages (image_url, message, created_by, created_date, season_id, race_id)";
 
 function getLatestRadioMessage() {
     return new Promise((resolve,reject)=>{    
@@ -29,6 +30,33 @@ function getLatestRadioMessage() {
             }
             resolve(rows[0]);
         });
+    });
+}
+
+function addNewRadioMessage(newMessage) {
+    return new Promise((resolve, reject) => {
+        try {
+            let insertStatement = addRadioMessage + " VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
+            db.serialize(() => {
+                db.exec("BEGIN;");
+                    let valuesObject = {
+                        1: newMessage.image_url,
+                        2: encodeURIComponent(newMessage.message),
+                        3: newMessage.created_by,
+                        4: newMessage.created_date,
+                        5: newMessage.season_id,
+                        6: newMessage.race_id
+                    };
+                    db.run(insertStatement, valuesObject);
+                db.exec("COMMIT;");
+                resolve(true);
+            });
+        }
+        catch (exception) {
+            console.log(exception);
+            db.exec("ROLLBACK;");
+            reject(exception);
+        }
     });
 }
 
@@ -393,5 +421,6 @@ module.exports = {
     getFullUsers: getFullUsers,
 	getUsers: getUsers,
     updateUser: updateUser,
-    getLatestRadioMessage: getLatestRadioMessage
+    getLatestRadioMessage: getLatestRadioMessage,
+    addNewRadioMessage: addNewRadioMessage
 }

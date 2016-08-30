@@ -16,5 +16,23 @@ module.exports = [
                 });  
             }
         }
+    },
+    {
+        method: 'POST',
+        path: '/radio/add',
+        config: {
+            cors: true,
+            handler: function (request, reply) {
+                if (request.payload){
+                    db.addNewRadioMessage(request.payload).then((bool)=>{
+                        if (bool){
+                            reply("{success:true}");
+                        }
+                    });
+                }else{
+                    reply("Where's the payload");
+                }
+            }
+        }
     }
 ]
